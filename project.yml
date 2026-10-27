@@ -34,3 +34,6 @@ targets:
       - path: Tests/WhispererTests
     dependencies:
       - target: Whisperer
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES

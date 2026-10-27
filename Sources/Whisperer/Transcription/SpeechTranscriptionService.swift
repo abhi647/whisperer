@@ -65,7 +65,7 @@ final class SpeechTranscriptionService {
         )
         continuation = streamContinuation
 
-        recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
+        recognitionTask = recognizer.recognitionTask(with: request) { @Sendable [weak self] result, error in
             let text = result?.bestTranscription.formattedString
             let isFinal = result?.isFinal ?? false
             Task { @MainActor [weak self] in
@@ -80,7 +80,7 @@ final class SpeechTranscriptionService {
             }
         }
 
-        input.installTap(onBus: 0, bufferSize: 1_024, format: format) { buffer, _ in
+        input.installTap(onBus: 0, bufferSize: 1_024, format: format) { @Sendable buffer, _ in
             request.append(buffer)
             let level = buffer.normalizedLevel
             streamContinuation.yield(TranscriptionUpdate(text: "", isFinal: false, audioLevel: level))

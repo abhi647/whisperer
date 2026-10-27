@@ -9,6 +9,13 @@ struct WhispererApp: App {
         WindowGroup("Whisperer", id: "dashboard") {
             DashboardView()
                 .environmentObject(model)
+                .task {
+#if DEBUG
+                    guard ProcessInfo.processInfo.environment["WHISPERER_AUTOSTART_TEST"] == "1" else { return }
+                    model.consentConfirmed = true
+                    model.startSession()
+#endif
+                }
         }
         .defaultSize(width: 980, height: 680)
 
