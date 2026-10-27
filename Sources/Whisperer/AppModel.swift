@@ -19,8 +19,8 @@ final class AppModel: ObservableObject {
     @Published var incomingAudio = AudioChannel(name: "System audio (coming soon)", level: 0, isAvailable: false)
     @Published var microphone = AudioChannel(name: "Mac microphone", level: 0, isAvailable: true)
     @Published var lastError: String?
-    @Published var openAIKeyInput = ""
-    @Published private(set) var hasOpenAIKey = false
+    @Published var anthropicKeyInput = ""
+    @Published private(set) var hasAnthropicKey = false
     @Published private(set) var sessionStartedAt: Date?
     @Published private(set) var sessionEndedAt: Date?
 
@@ -30,7 +30,7 @@ final class AppModel: ObservableObject {
     private var partialTranscriptID: UUID?
 
     init() {
-        hasOpenAIKey = ((try? keychain.value(for: .openAIAPIKey)) ?? nil)?.isEmpty == false
+        hasAnthropicKey = ((try? keychain.value(for: .anthropicAPIKey)) ?? nil)?.isEmpty == false
     }
 
     var canStart: Bool { consentConfirmed && status != .listening && status != .preparing }
@@ -165,27 +165,27 @@ final class AppModel: ObservableObject {
         lastError = "Cue flagged for scoped review: \(cue.sayNow.prefix(48))…"
     }
 
-    func saveOpenAIKey() {
-        let key = openAIKeyInput.trimmingCharacters(in: .whitespacesAndNewlines)
+    func saveAnthropicKey() {
+        let key = anthropicKeyInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !key.isEmpty else {
             lastError = "Enter an API key before saving."
             return
         }
         do {
-            try keychain.save(key, for: .openAIAPIKey)
-            openAIKeyInput = ""
-            hasOpenAIKey = true
+            try keychain.save(key, for: .anthropicAPIKey)
+            anthropicKeyInput = ""
+            hasAnthropicKey = true
             lastError = nil
         } catch {
             lastError = error.localizedDescription
         }
     }
 
-    func deleteOpenAIKey() {
+    func deleteAnthropicKey() {
         do {
-            try keychain.delete(.openAIAPIKey)
-            openAIKeyInput = ""
-            hasOpenAIKey = false
+            try keychain.delete(.anthropicAPIKey)
+            anthropicKeyInput = ""
+            hasAnthropicKey = false
         } catch {
             lastError = error.localizedDescription
         }
@@ -233,11 +233,11 @@ final class AppModel: ObservableObject {
     }
 
     private func generateCue(for text: String) {
-        guard let apiKey = try? keychain.value(for: .openAIAPIKey), !apiKey.isEmpty else {
-            lastError = "Transcript captured. Add an OpenAI API key to generate live cues."
+        guard let apiKey = try? keychain.value(for: .anthropicAPIKey), !apiKey.isEmpty else {
+            lastError = "Transcript captured. Add an Anthropic API key to generate live cues."
             return
         }
-        let provider = OpenAICueProvider(apiKey: apiKey)
+        let provider = ClaudeCueProvider(apiKey: apiKey)
         let context = CueContext(customerName: customerName, scope: selectedScope)
         status = .preparing
         Task {

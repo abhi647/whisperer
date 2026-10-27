@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		039A94A519C7086BC5C8B04C /* ClaudeCueProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8A2264D8245F62C08DDC3F /* ClaudeCueProvider.swift */; };
 		1521170E951C9223C7462587 /* WhispererApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7333B844A64C8953F12641C7 /* WhispererApp.swift */; };
 		159184181EBF20E58C6C0A56 /* MicrophoneCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F580C725157CE6AFBF331CB3 /* MicrophoneCaptureService.swift */; };
 		2C86B51E3404EE0D86776411 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7E1C720665086AEF43609C /* Theme.swift */; };
 		350432F52DC275BC340D0C63 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA578FDE0FA3753F77D908D5 /* AppModel.swift */; };
 		58743A4CA9C0EED8500822CE /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D379F1F661FDE2E2B5F53AB /* KeychainStore.swift */; };
-		5F064ED6004980E47CA238EE /* OpenAICueProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D4A4D9AEFF211E4842CBA1 /* OpenAICueProvider.swift */; };
 		6EF647C3130AD6BDA7C95CCE /* SpeechTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB9DCEF72540B1DF06D52B5A /* SpeechTranscriptionService.swift */; };
 		A414C223583830306F566E82 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B681B262F0D71073BCB72C6 /* OverlayView.swift */; };
 		AB28598255D4AC457F9AB7B8 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD70D3A11162B05CFDAD02A /* Models.swift */; };
@@ -32,7 +32,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		00D4A4D9AEFF211E4842CBA1 /* OpenAICueProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICueProvider.swift; sourceTree = "<group>"; };
 		20FBE71E75794271870D22B8 /* CueQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CueQueueTests.swift; sourceTree = "<group>"; };
 		4B1CEF2EDDB4F3829397085E /* CapturePermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePermissions.swift; sourceTree = "<group>"; };
 		4D379F1F661FDE2E2B5F53AB /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
@@ -45,6 +44,7 @@
 		AD7E1C720665086AEF43609C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		DB9DCEF72540B1DF06D52B5A /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
 		EB5340316ACE5F4AB25CC622 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		ED8A2264D8245F62C08DDC3F /* ClaudeCueProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCueProvider.swift; sourceTree = "<group>"; };
 		F580C725157CE6AFBF331CB3 /* MicrophoneCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCaptureService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,7 +77,7 @@
 		4E9F2B028BFE2EF2BF342105 /* AI */ = {
 			isa = PBXGroup;
 			children = (
-				00D4A4D9AEFF211E4842CBA1 /* OpenAICueProvider.swift */,
+				ED8A2264D8245F62C08DDC3F /* ClaudeCueProvider.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -209,11 +209,11 @@
 			files = (
 				350432F52DC275BC340D0C63 /* AppModel.swift in Sources */,
 				CA70D7238C62E1E9A20F8843 /* CapturePermissions.swift in Sources */,
+				039A94A519C7086BC5C8B04C /* ClaudeCueProvider.swift in Sources */,
 				DFA2F4761FF27CBC5907E4CE /* DashboardView.swift in Sources */,
 				58743A4CA9C0EED8500822CE /* KeychainStore.swift in Sources */,
 				159184181EBF20E58C6C0A56 /* MicrophoneCaptureService.swift in Sources */,
 				AB28598255D4AC457F9AB7B8 /* Models.swift in Sources */,
-				5F064ED6004980E47CA238EE /* OpenAICueProvider.swift in Sources */,
 				A414C223583830306F566E82 /* OverlayView.swift in Sources */,
 				6EF647C3130AD6BDA7C95CCE /* SpeechTranscriptionService.swift in Sources */,
 				2C86B51E3404EE0D86776411 /* Theme.swift in Sources */,

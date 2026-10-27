@@ -3,7 +3,7 @@ import Security
 
 enum CredentialKind: String, CaseIterable, Identifiable {
     case deepgramAPIKey = "deepgram-api-key"
-    case openAIAPIKey = "openai-api-key"
+    case anthropicAPIKey = "anthropic-api-key"
 
     var id: String { rawValue }
 }

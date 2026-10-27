@@ -137,7 +137,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 14) {
             SectionHeading("Production readiness", icon: "checkmark.seal")
             ReadinessRow(title: "Microphone transcription", ready: model.microphone.isAvailable)
-            ReadinessRow(title: "AI cue generation", ready: model.hasOpenAIKey, actionTitle: model.hasOpenAIKey ? nil : "Configure") { selection = .settings }
+            ReadinessRow(title: "Claude cue generation", ready: model.hasAnthropicKey, actionTitle: model.hasAnthropicKey ? nil : "Configure") { selection = .settings }
             ReadinessRow(title: "Privacy reminder", ready: !model.showPrivacyWarning)
         }
         .whispererCard().frame(maxWidth: .infinity, alignment: .leading)
@@ -197,15 +197,15 @@ struct DashboardView: View {
                 pageHeader(eyebrow: "PREFERENCES", title: "Settings", subtitle: "Credentials stay in your Keychain. Capture always requires explicit consent.") { EmptyView() }
                 VStack(alignment: .leading, spacing: 16) {
                     SectionHeading("AI cue generation", icon: "sparkles")
-                    Text("Use your OpenAI API key to generate structured Say Now, Continue, and Ask Next cues from final transcript turns.").foregroundStyle(.secondary)
+                    Text("Use your Anthropic API key to generate structured Say Now, Continue, and Ask Next cues with Claude Haiku.").foregroundStyle(.secondary)
                     HStack {
-                        SecureField(model.hasOpenAIKey ? "OpenAI key saved" : "OpenAI API key", text: $model.openAIKeyInput).textFieldStyle(.roundedBorder)
-                        Button("Save key") { model.saveOpenAIKey() }.buttonStyle(.borderedProminent)
-                            .disabled(model.openAIKeyInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        if model.hasOpenAIKey { Button("Remove", role: .destructive) { model.deleteOpenAIKey() } }
+                        SecureField(model.hasAnthropicKey ? "Anthropic key saved" : "Anthropic API key", text: $model.anthropicKeyInput).textFieldStyle(.roundedBorder)
+                        Button("Save key") { model.saveAnthropicKey() }.buttonStyle(.borderedProminent)
+                            .disabled(model.anthropicKeyInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        if model.hasAnthropicKey { Button("Remove", role: .destructive) { model.deleteAnthropicKey() } }
                     }
-                    Label(model.hasOpenAIKey ? "API key securely stored" : "No AI provider configured", systemImage: model.hasOpenAIKey ? "checkmark.circle.fill" : "info.circle")
-                        .font(.caption.weight(.medium)).foregroundStyle(model.hasOpenAIKey ? WhispererTheme.accent : .secondary)
+                    Label(model.hasAnthropicKey ? "Anthropic key securely stored" : "Claude is not configured", systemImage: model.hasAnthropicKey ? "checkmark.circle.fill" : "info.circle")
+                        .font(.caption.weight(.medium)).foregroundStyle(model.hasAnthropicKey ? WhispererTheme.accent : .secondary)
                 }
                 .whispererCard()
                 VStack(alignment: .leading, spacing: 14) {

@@ -10,7 +10,7 @@ This repository implements a native M1/M2 development slice:
 - floating, always-on-top teleprompter with compact/focus-friendly content;
 - explicit consent, start, pause, stop, hide, and privacy-warning states;
 - live microphone capture, Apple Speech transcription, and separate incoming-audio health presentation;
-- optional structured OpenAI cue generation with the API key stored in macOS Keychain;
+- optional structured Claude cue generation with the Anthropic API key stored in macOS Keychain;
 - stable cue cards: new suggestions queue instead of replacing text being read;
 - `Say Now`, progressive `Continue`, and `Ask Next` regions;
 - dedicated Session, Transcript, and Settings workspaces;
@@ -18,7 +18,7 @@ This repository implements a native M1/M2 development slice:
 - live session duration, capture readiness, and explicit provider/privacy states;
 - a simulated customer question for product and accessibility testing.
 
-The microphone path uses real, permission-gated audio capture and live transcription. When a user explicitly stores an OpenAI API key in the app, final transcript turns can generate structured cues. The app still does **not** capture meeting/system audio, ground answers in imported knowledge, or claim to hide itself from screen sharing.
+The microphone path uses real, permission-gated audio capture and live transcription. When a user explicitly stores an Anthropic API key in the app, final transcript turns can generate structured cues with Claude Haiku. The app still does **not** capture meeting/system audio, ground answers in imported knowledge, or claim to hide itself from screen sharing.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ Run unit tests with:
 swift test
 ```
 
-Transcription can run without an API key. AI cues are opt-in and require a user-supplied OpenAI API key, stored in Keychain.
+Transcription can run without an API key. AI cues are opt-in and require a user-supplied Anthropic API key, stored in Keychain.
 
 ### Development console notes
 
