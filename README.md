@@ -13,6 +13,9 @@ This repository implements a native M1/M2 development slice:
 - optional structured OpenAI cue generation with the API key stored in macOS Keychain;
 - stable cue cards: new suggestions queue instead of replacing text being read;
 - `Say Now`, progressive `Continue`, and `Ask Next` regions;
+- dedicated Session, Transcript, and Settings workspaces;
+- searchable transcripts with native copy and plain-text export;
+- live session duration, capture readiness, and explicit provider/privacy states;
 - a simulated customer question for product and accessibility testing.
 
 The microphone path uses real, permission-gated audio capture and live transcription. When a user explicitly stores an OpenAI API key in the app, final transcript turns can generate structured cues. The app still does **not** capture meeting/system audio, ground answers in imported knowledge, or claim to hide itself from screen sharing.

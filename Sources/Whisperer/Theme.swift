@@ -9,6 +9,28 @@ enum WhispererTheme {
     static let warning = Color(red: 0.89, green: 0.737, blue: 0.471)
     static let critical = Color(red: 0.882, green: 0.576, blue: 0.553)
     static let stroke = Color(red: 0.251, green: 0.314, blue: 0.341)
+    static let canvas = LinearGradient(
+        colors: [Color(nsColor: .windowBackgroundColor), accent.opacity(0.035)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
+enum CardProminence { case standard, hero }
+
+struct WhispererCard: ViewModifier {
+    let prominence: CardProminence
+
+    func body(content: Content) -> some View {
+        content
+            .padding(prominence == .hero ? 22 : 18)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: prominence == .hero ? 22 : 16, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: prominence == .hero ? 22 : 16, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.075), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(prominence == .hero ? 0.11 : 0.055), radius: prominence == .hero ? 20 : 10, y: prominence == .hero ? 8 : 4)
+    }
 }
 
 struct PremiumGlassSurface: ViewModifier {
@@ -23,6 +45,93 @@ struct PremiumGlassSurface: ViewModifier {
 extension View {
     func premiumGlass(cornerRadius: CGFloat = 18) -> some View {
         modifier(PremiumGlassSurface(cornerRadius: cornerRadius))
+    }
+
+    func whispererCard(prominence: CardProminence = .standard) -> some View {
+        modifier(WhispererCard(prominence: prominence))
+    }
+}
+
+struct SectionHeading: View {
+    let title: String
+    let icon: String
+
+    init(_ title: String, icon: String) {
+        self.title = title
+        self.icon = icon
+    }
+
+    var body: some View {
+        Label(title, systemImage: icon)
+            .font(.headline)
+            .foregroundStyle(.primary)
+    }
+}
+
+struct LiveDot: View {
+    let isActive: Bool
+
+    var body: some View {
+        Circle()
+            .fill(isActive ? WhispererTheme.accent : Color.secondary.opacity(0.45))
+            .frame(width: 9, height: 9)
+            .shadow(color: isActive ? WhispererTheme.accent.opacity(0.5) : .clear, radius: 5)
+            .accessibilityHidden(true)
+    }
+}
+
+struct ReadinessRow: View {
+    let title: String
+    let ready: Bool
+    var actionTitle: String?
+    var action: () -> Void = {}
+
+    var body: some View {
+        HStack(spacing: 9) {
+            Image(systemName: ready ? "checkmark.circle.fill" : "circle.dashed")
+                .foregroundStyle(ready ? WhispererTheme.accent : .secondary)
+            Text(title).font(.callout)
+            Spacer()
+            if let actionTitle {
+                Button(actionTitle, action: action).buttonStyle(.link)
+            } else {
+                Text(ready ? "Ready" : "Needs attention").font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+enum NoticeTone { case warning, privacy }
+
+struct NoticeBanner: View {
+    let message: String
+    let tone: NoticeTone
+    var dismiss: (() -> Void)?
+
+    init(message: String, tone: NoticeTone, dismiss: (() -> Void)? = nil) {
+        self.message = message
+        self.tone = tone
+        self.dismiss = dismiss
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 11) {
+            Image(systemName: tone == .privacy ? "hand.raised.fill" : "exclamationmark.triangle.fill")
+                .foregroundStyle(tone == .privacy ? WhispererTheme.accent : WhispererTheme.warning)
+            Text(message).font(.callout).fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            if let dismiss {
+                Button(action: dismiss) { Image(systemName: "xmark") }
+                    .buttonStyle(.plain).foregroundStyle(.secondary)
+                    .accessibilityLabel("Dismiss")
+            }
+        }
+        .padding(14)
+        .background((tone == .privacy ? WhispererTheme.accent : WhispererTheme.warning).opacity(0.09), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .strokeBorder((tone == .privacy ? WhispererTheme.accent : WhispererTheme.warning).opacity(0.22))
+        }
     }
 }
 

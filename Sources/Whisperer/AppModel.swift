@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import UniformTypeIdentifiers
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -15,11 +16,13 @@ final class AppModel: ObservableObject {
     @Published var focusMode = false
     @Published var expanded = false
     @Published var showPrivacyWarning = false
-    @Published var incomingAudio = AudioChannel(name: "System audio", level: 0, isAvailable: true)
+    @Published var incomingAudio = AudioChannel(name: "System audio (coming soon)", level: 0, isAvailable: false)
     @Published var microphone = AudioChannel(name: "Mac microphone", level: 0, isAvailable: true)
     @Published var lastError: String?
     @Published var openAIKeyInput = ""
     @Published private(set) var hasOpenAIKey = false
+    @Published private(set) var sessionStartedAt: Date?
+    @Published private(set) var sessionEndedAt: Date?
 
     private let transcriptionService = SpeechTranscriptionService()
     private let keychain = KeychainStore()
@@ -32,6 +35,7 @@ final class AppModel: ObservableObject {
 
     var canStart: Bool { consentConfirmed && status != .listening && status != .preparing }
     var queueCount: Int { cueQueue.count }
+    var isCapturing: Bool { status == .listening || status == .preparing || status == .ready || status == .privacyWarning }
 
     func startSession() {
         guard consentConfirmed else {
@@ -39,6 +43,8 @@ final class AppModel: ObservableObject {
             return
         }
         lastError = nil
+        sessionStartedAt = .now
+        sessionEndedAt = nil
         status = .listening
         overlayVisible = true
         evaluateDisplayPrivacy()
@@ -51,7 +57,49 @@ final class AppModel: ObservableObject {
         transcriptionService.stop()
         incomingAudio.level = 0
         microphone.level = 0
+        sessionEndedAt = .now
         status = .stopped
+    }
+
+    func formattedDuration(at date: Date = .now) -> String {
+        guard let sessionStartedAt else { return "00:00" }
+        let end = sessionEndedAt ?? date
+        let seconds = max(0, Int(end.timeIntervalSince(sessionStartedAt)))
+        return String(format: "%02d:%02d", seconds / 60, seconds % 60)
+    }
+
+    func copyTranscript() {
+        guard !transcript.isEmpty else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(transcriptText, forType: .string)
+    }
+
+    func exportTranscript() {
+        guard !transcript.isEmpty else { return }
+        let panel = NSSavePanel()
+        panel.title = "Export transcript"
+        panel.nameFieldStringValue = "\(sanitizedCustomerName)-transcript.txt"
+        panel.allowedContentTypes = [.plainText]
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try transcriptText.write(to: url, atomically: true, encoding: .utf8)
+            lastError = nil
+        } catch {
+            lastError = "The transcript could not be exported: \(error.localizedDescription)"
+        }
+    }
+
+    func clearSession() {
+        stopSession()
+        transcript.removeAll()
+        cueQueue.removeAll()
+        activeCue = nil
+        partialTranscriptID = nil
+        sessionStartedAt = nil
+        sessionEndedAt = nil
+        consentConfirmed = false
+        lastError = nil
+        status = .idle
     }
 
     func togglePause() {
@@ -201,5 +249,19 @@ final class AppModel: ObservableObject {
                 status = .listening
             }
         }
+    }
+
+    private var transcriptText: String {
+        let heading = "\(customerName)\nExported \(Date().formatted(date: .abbreviated, time: .shortened))\n"
+        let body = transcript.map { turn in
+            "[\(turn.timestamp.formatted(date: .omitted, time: .shortened))] \(turn.speaker): \(turn.text)"
+        }.joined(separator: "\n\n")
+        return "\(heading)\n\(body)\n"
+    }
+
+    private var sanitizedCustomerName: String {
+        let value = customerName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let base = value.isEmpty ? "Whisperer" : value
+        return base.replacingOccurrences(of: "[^A-Za-z0-9_-]+", with: "-", options: .regularExpression)
     }
 }
