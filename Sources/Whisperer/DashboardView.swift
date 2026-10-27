@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject private var model: AppModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationSplitView {
@@ -31,6 +32,11 @@ struct DashboardView: View {
             .background(Color(nsColor: .windowBackgroundColor))
         }
         .frame(minWidth: 900, minHeight: 620)
+        .onChange(of: model.overlayVisible) { _, isVisible in
+            if isVisible {
+                openWindow(id: "overlay")
+            }
+        }
     }
 
     private var credentials: some View {
@@ -74,7 +80,10 @@ struct DashboardView: View {
                 TextField("Customer or meeting name", text: $model.customerName)
                 Toggle("I am responsible for participant consent and authorization", isOn: $model.consentConfirmed)
                 HStack {
-                    Button("Start session") { model.startSession() }
+                    Button("Start session") {
+                        model.startSession()
+                        showTeleprompterIfNeeded()
+                    }
                         .buttonStyle(.borderedProminent)
                         .disabled(!model.canStart)
                     Button(model.status == .paused ? "Resume" : "Pause") { model.togglePause() }
@@ -82,7 +91,10 @@ struct DashboardView: View {
                     Button("Stop") { model.stopSession() }
                         .disabled(model.status == .idle || model.status == .stopped)
                     Spacer()
-                    Button("Show teleprompter") { model.overlayVisible = true }
+                    Button("Show teleprompter") {
+                        model.overlayVisible = true
+                        openWindow(id: "overlay")
+                    }
                     Button("Simulate customer question") { model.requestDemoCue() }
                         .disabled(model.status == .idle || model.status == .paused)
                 }
@@ -118,6 +130,12 @@ struct DashboardView: View {
                 }
             }
             .padding(8)
+        }
+    }
+
+    private func showTeleprompterIfNeeded() {
+        if model.overlayVisible {
+            openWindow(id: "overlay")
         }
     }
 }
