@@ -24,13 +24,15 @@
     <string>public.app-category.productivity</string>
     <key>LSMinimumSystemVersion</key>
     <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Whisperer uses your microphone only during an active, consented meeting session to produce a live transcript and private speaking cues.</string>
-    <key>NSScreenCaptureUsageDescription</key>
-    <string>Whisperer captures only the system audio and screen source you explicitly select during an active meeting session.</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2026 Seven Billion Analytics Pvt Ltd.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Whisperer uses your microphone only during an active, consented meeting session to produce a live transcript and private speaking cues.</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Whisperer converts microphone audio into a live transcript only during a consented meeting session.</string>
+    <key>NSScreenCaptureUsageDescription</key>
+    <string>Whisperer captures only the system audio and screen source you explicitly select during an active meeting session.</string>
 </dict>
 </plist>

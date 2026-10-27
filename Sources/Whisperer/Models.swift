@@ -11,7 +11,7 @@ enum SessionStatus: String, CaseIterable, Codable {
     case stopped = "Stopped"
 }
 
-enum KnowledgeScope: String, CaseIterable, Identifiable, Codable {
+enum KnowledgeScope: String, CaseIterable, Identifiable, Codable, Sendable {
     case general = "General"
     case company = "Seven Billion Analytics"
     case customer = "Customer account"
@@ -67,12 +67,21 @@ struct CueCard: Identifiable, Equatable, Codable {
 }
 
 struct TranscriptTurn: Identifiable, Equatable {
-    let id = UUID()
+    let id: UUID
     var speaker: String
     var text: String
     var language: String
     var isFinal: Bool
     var timestamp: Date = .now
+
+    init(id: UUID = UUID(), speaker: String, text: String, language: String, isFinal: Bool, timestamp: Date = .now) {
+        self.id = id
+        self.speaker = speaker
+        self.text = text
+        self.language = language
+        self.isFinal = isFinal
+        self.timestamp = timestamp
+    }
 }
 
 struct AudioChannel: Identifiable, Equatable {

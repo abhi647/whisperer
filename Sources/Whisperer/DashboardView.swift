@@ -21,6 +21,7 @@ struct DashboardView: View {
                             .foregroundStyle(WhispererTheme.warning)
                     }
                     meetingContext
+                    credentials
                     captureHealth
                     transcript
                 }
@@ -30,6 +31,25 @@ struct DashboardView: View {
             .background(Color(nsColor: .windowBackgroundColor))
         }
         .frame(minWidth: 900, minHeight: 620)
+    }
+
+    private var credentials: some View {
+        GroupBox("AI cue generation") {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("The API key is stored in your macOS Keychain and is never written to project files.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                HStack {
+                    SecureField(model.hasOpenAIKey ? "OpenAI key saved" : "OpenAI API key", text: $model.openAIKeyInput)
+                    Button("Save key") { model.saveOpenAIKey() }
+                        .disabled(model.openAIKeyInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    if model.hasOpenAIKey {
+                        Button("Remove", role: .destructive) { model.deleteOpenAIKey() }
+                    }
+                }
+            }
+            .padding(8)
+        }
     }
 
     private var header: some View {

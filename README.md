@@ -4,17 +4,18 @@ Native macOS prototype for the Discreet Meeting Copilot product definition.
 
 ## Current slice
 
-This repository implements a credential-free M1/M2 interaction prototype:
+This repository implements a native M1/M2 development slice:
 
 - menu-bar lifecycle and a native meeting dashboard;
 - floating, always-on-top teleprompter with compact/focus-friendly content;
 - explicit consent, start, pause, stop, hide, and privacy-warning states;
-- live microphone capture and separate incoming-audio health presentation;
+- live microphone capture, Apple Speech transcription, and separate incoming-audio health presentation;
+- optional structured OpenAI cue generation with the API key stored in macOS Keychain;
 - stable cue cards: new suggestions queue instead of replacing text being read;
 - `Say Now`, progressive `Continue`, and `Ask Next` regions;
 - a simulated customer question for product and accessibility testing.
 
-The microphone meter uses real, permission-gated audio capture. Cue generation remains intentionally simulated. The app does **not** yet transcribe, contact a model, capture meeting/system audio, or claim to hide itself from screen sharing.
+The microphone path uses real, permission-gated audio capture and live transcription. When a user explicitly stores an OpenAI API key in the app, final transcript turns can generate structured cues. The app still does **not** capture meeting/system audio, ground answers in imported knowledge, or claim to hide itself from screen sharing.
 
 ## Requirements
 
@@ -43,7 +44,7 @@ Run unit tests with:
 swift test
 ```
 
-The prototype requires no API keys and makes no network requests.
+Transcription can run without an API key. AI cues are opt-in and require a user-supplied OpenAI API key, stored in Keychain.
 
 ### Development console notes
 

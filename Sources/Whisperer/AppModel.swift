@@ -1,5 +1,4 @@
 import AppKit
-import AVFoundation
 import Combine
 import Foundation
 
@@ -19,9 +18,17 @@ final class AppModel: ObservableObject {
     @Published var incomingAudio = AudioChannel(name: "System audio", level: 0, isAvailable: true)
     @Published var microphone = AudioChannel(name: "Mac microphone", level: 0, isAvailable: true)
     @Published var lastError: String?
+    @Published var openAIKeyInput = ""
+    @Published private(set) var hasOpenAIKey = false
 
-    private let microphoneCapture = MicrophoneCaptureService()
+    private let transcriptionService = SpeechTranscriptionService()
+    private let keychain = KeychainStore()
     private var microphoneTask: Task<Void, Never>?
+    private var partialTranscriptID: UUID?
+
+    init() {
+        hasOpenAIKey = ((try? keychain.value(for: .openAIAPIKey)) ?? nil)?.isEmpty == false
+    }
 
     var canStart: Bool { consentConfirmed && status != .listening && status != .preparing }
     var queueCount: Int { cueQueue.count }
@@ -41,7 +48,7 @@ final class AppModel: ObservableObject {
     func stopSession() {
         microphoneTask?.cancel()
         microphoneTask = nil
-        microphoneCapture.stop()
+        transcriptionService.stop()
         incomingAudio.level = 0
         microphone.level = 0
         status = .stopped
@@ -54,7 +61,7 @@ final class AppModel: ObservableObject {
         } else if status == .listening || status == .ready || status == .preparing {
             microphoneTask?.cancel()
             microphoneTask = nil
-            microphoneCapture.stop()
+            transcriptionService.stop()
             incomingAudio.level = 0
             microphone.level = 0
             status = .paused
@@ -110,6 +117,32 @@ final class AppModel: ObservableObject {
         lastError = "Cue flagged for scoped review: \(cue.sayNow.prefix(48))…"
     }
 
+    func saveOpenAIKey() {
+        let key = openAIKeyInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty else {
+            lastError = "Enter an API key before saving."
+            return
+        }
+        do {
+            try keychain.save(key, for: .openAIAPIKey)
+            openAIKeyInput = ""
+            hasOpenAIKey = true
+            lastError = nil
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    func deleteOpenAIKey() {
+        do {
+            try keychain.delete(.openAIAPIKey)
+            openAIKeyInput = ""
+            hasOpenAIKey = false
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
     func evaluateDisplayPrivacy() {
         showPrivacyWarning = NSScreen.screens.count < 2
         if showPrivacyWarning { status = .privacyWarning }
@@ -119,10 +152,13 @@ final class AppModel: ObservableObject {
         microphoneTask?.cancel()
         microphoneTask = Task {
             do {
-                let frames = try await microphoneCapture.start()
-                for await frame in frames {
+                let updates = try await transcriptionService.start()
+                microphone.isAvailable = true
+                for try await update in updates {
                     guard !Task.isCancelled else { break }
-                    microphone.level = frame.buffer.normalizedLevel
+                    microphone.level = update.audioLevel
+                    guard !update.text.isEmpty else { continue }
+                    applyTranscript(update)
                 }
             } catch {
                 microphone.isAvailable = false
@@ -131,19 +167,39 @@ final class AppModel: ObservableObject {
             }
         }
     }
-}
 
-private extension AVAudioPCMBuffer {
-    var normalizedLevel: Double {
-        guard let channels = floatChannelData, frameLength > 0 else { return 0 }
-        let samples = channels[0]
-        var sum: Float = 0
-        for index in 0..<Int(frameLength) {
-            let value = samples[index]
-            sum += value * value
+    private func applyTranscript(_ update: TranscriptionUpdate) {
+        if let id = partialTranscriptID,
+           let index = transcript.firstIndex(where: { $0.id == id }) {
+            transcript[index].text = update.text
+            transcript[index].isFinal = update.isFinal
+        } else {
+            let turn = TranscriptTurn(speaker: "You", text: update.text, language: Locale.current.localizedString(forIdentifier: Locale.current.identifier) ?? "Local", isFinal: update.isFinal)
+            transcript.append(turn)
+            partialTranscriptID = turn.id
         }
-        let rms = sqrt(sum / Float(frameLength))
-        let decibels = 20 * log10(max(rms, 0.000_01))
-        return min(1, max(0, Double((decibels + 60) / 60)))
+
+        guard update.isFinal else { return }
+        partialTranscriptID = nil
+        generateCue(for: update.text)
+    }
+
+    private func generateCue(for text: String) {
+        guard let apiKey = try? keychain.value(for: .openAIAPIKey), !apiKey.isEmpty else {
+            lastError = "Transcript captured. Add an OpenAI API key to generate live cues."
+            return
+        }
+        let provider = OpenAICueProvider(apiKey: apiKey)
+        let context = CueContext(customerName: customerName, scope: selectedScope)
+        status = .preparing
+        Task {
+            do {
+                enqueue(try await provider.generateCue(for: text, context: context))
+                lastError = nil
+            } catch {
+                lastError = error.localizedDescription
+                status = .listening
+            }
+        }
     }
 }

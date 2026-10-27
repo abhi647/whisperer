@@ -9,7 +9,6 @@ settings:
     SWIFT_VERSION: "6.2"
     MACOSX_DEPLOYMENT_TARGET: "26.0"
     PRODUCT_BUNDLE_IDENTIFIER: com.sevenbillionanalytics.whisperer
-    PRODUCT_NAME: Whisperer
     CODE_SIGN_STYLE: Automatic
     ENABLE_HARDENED_RUNTIME: YES
     SWIFT_STRICT_CONCURRENCY: complete
@@ -19,12 +18,9 @@ targets:
     platform: macOS
     sources:
       - path: Sources/Whisperer
-    info:
-      path: Config/Info.plist
-    entitlements:
-      path: Config/Whisperer.entitlements
     settings:
       base:
+        PRODUCT_NAME: Whisperer
         INFOPLIST_FILE: Config/Info.plist
         CODE_SIGN_ENTITLEMENTS: Config/Whisperer.entitlements
         GENERATE_INFOPLIST_FILE: NO
