@@ -42,7 +42,7 @@ final class SpeechTranscriptionService {
         guard await permissions.requestMicrophone() == .authorized else {
             throw TranscriptionError.microphonePermissionDenied
         }
-        guard await requestSpeechAuthorization() == .authorized else {
+        guard await Self.requestSpeechAuthorization() == .authorized else {
             throw TranscriptionError.speechPermissionDenied
         }
         guard let recognizer = SFSpeechRecognizer(locale: locale), recognizer.isAvailable else {
@@ -103,7 +103,7 @@ final class SpeechTranscriptionService {
         continuation = nil
     }
 
-    private func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
+    nonisolated private static func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
         let current = SFSpeechRecognizer.authorizationStatus()
         guard current == .notDetermined else { return current }
         return await withCheckedContinuation { continuation in
