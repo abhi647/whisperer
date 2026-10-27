@@ -95,7 +95,8 @@ struct OverlayView: View {
         }
         .padding(20)
         .frame(minWidth: 420, idealWidth: 500, maxWidth: 540, alignment: .topLeading)
-        .background(WhispererTheme.background.opacity(0.98))
+        .background(WhispererTheme.background.opacity(0.72), in: RoundedRectangle(cornerRadius: 18))
+        .premiumGlass(cornerRadius: 18)
         .foregroundStyle(WhispererTheme.primary)
     }
 }

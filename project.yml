@@ -1,0 +1,40 @@
+name: Whisperer
+options:
+  bundleIdPrefix: com.sevenbillionanalytics
+  deploymentTarget:
+    macOS: "26.0"
+  xcodeVersion: "27.1"
+settings:
+  base:
+    SWIFT_VERSION: "6.2"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    PRODUCT_BUNDLE_IDENTIFIER: com.sevenbillionanalytics.whisperer
+    PRODUCT_NAME: Whisperer
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  Whisperer:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/Whisperer
+    info:
+      path: Config/Info.plist
+    entitlements:
+      path: Config/Whisperer.entitlements
+    settings:
+      base:
+        INFOPLIST_FILE: Config/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Config/Whisperer.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+    scheme:
+      testTargets:
+        - WhispererTests
+  WhispererTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/WhispererTests
+    dependencies:
+      - target: Whisperer

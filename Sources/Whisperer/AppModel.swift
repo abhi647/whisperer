@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import Combine
 import Foundation
 
@@ -19,7 +20,8 @@ final class AppModel: ObservableObject {
     @Published var microphone = AudioChannel(name: "Mac microphone", level: 0, isAvailable: true)
     @Published var lastError: String?
 
-    private var simulationTask: Task<Void, Never>?
+    private let microphoneCapture = MicrophoneCaptureService()
+    private var microphoneTask: Task<Void, Never>?
 
     var canStart: Bool { consentConfirmed && status != .listening && status != .preparing }
     var queueCount: Int { cueQueue.count }
@@ -33,12 +35,13 @@ final class AppModel: ObservableObject {
         status = .listening
         overlayVisible = true
         evaluateDisplayPrivacy()
-        beginLevelSimulation()
+        startMicrophoneCapture()
     }
 
     func stopSession() {
-        simulationTask?.cancel()
-        simulationTask = nil
+        microphoneTask?.cancel()
+        microphoneTask = nil
+        microphoneCapture.stop()
         incomingAudio.level = 0
         microphone.level = 0
         status = .stopped
@@ -47,9 +50,11 @@ final class AppModel: ObservableObject {
     func togglePause() {
         if status == .paused {
             status = .listening
-            beginLevelSimulation()
+            startMicrophoneCapture()
         } else if status == .listening || status == .ready || status == .preparing {
-            simulationTask?.cancel()
+            microphoneTask?.cancel()
+            microphoneTask = nil
+            microphoneCapture.stop()
             incomingAudio.level = 0
             microphone.level = 0
             status = .paused
@@ -110,15 +115,35 @@ final class AppModel: ObservableObject {
         if showPrivacyWarning { status = .privacyWarning }
     }
 
-    private func beginLevelSimulation() {
-        simulationTask?.cancel()
-        simulationTask = Task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(220))
-                guard !Task.isCancelled else { return }
-                incomingAudio.level = Double.random(in: 0.18...0.82)
-                microphone.level = Double.random(in: 0.08...0.58)
+    private func startMicrophoneCapture() {
+        microphoneTask?.cancel()
+        microphoneTask = Task {
+            do {
+                let frames = try await microphoneCapture.start()
+                for await frame in frames {
+                    guard !Task.isCancelled else { break }
+                    microphone.level = frame.buffer.normalizedLevel
+                }
+            } catch {
+                microphone.isAvailable = false
+                lastError = error.localizedDescription
+                status = .unavailable
             }
         }
+    }
+}
+
+private extension AVAudioPCMBuffer {
+    var normalizedLevel: Double {
+        guard let channels = floatChannelData, frameLength > 0 else { return 0 }
+        let samples = channels[0]
+        var sum: Float = 0
+        for index in 0..<Int(frameLength) {
+            let value = samples[index]
+            sum += value * value
+        }
+        let rms = sqrt(sum / Float(frameLength))
+        let decibels = 20 * log10(max(rms, 0.000_01))
+        return min(1, max(0, Double((decibels + 60) / 60)))
     }
 }

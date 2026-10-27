@@ -11,6 +11,21 @@ enum WhispererTheme {
     static let stroke = Color(red: 0.251, green: 0.314, blue: 0.341)
 }
 
+struct PremiumGlassSurface: ViewModifier {
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+    }
+}
+
+extension View {
+    func premiumGlass(cornerRadius: CGFloat = 18) -> some View {
+        modifier(PremiumGlassSurface(cornerRadius: cornerRadius))
+    }
+}
+
 struct StatusPill: View {
     let status: SessionStatus
 

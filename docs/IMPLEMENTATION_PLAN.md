@@ -8,7 +8,7 @@ The principal implementation risk is not the SwiftUI shell. It is the combinatio
 
 Before production use, the following open decisions need explicit resolution:
 
-1. Minimum supported macOS version. This prototype uses macOS 14+.
+1. Minimum supported macOS version. The premium build now targets macOS 26+ for native Liquid Glass.
 2. Distribution and signing identity: local development, private Developer ID distribution, or Mac App Store.
 3. Initial speech-to-text and language-model providers, contractual retention, processing region, and production secret relay.
 4. Exact consent acknowledgement and organization policy.
@@ -71,4 +71,4 @@ Before production use, the following open decisions need explicit resolution:
 
 ## Definition of “prototype ready”
 
-The current slice is ready for interaction review when it builds and its tests pass in Xcode on macOS 14+. It is not ready for customer calls. Customer-call readiness requires real-device completion of M1–M4 acceptance scenarios, privacy verification, provider review, and signed distribution.
+The current slice is ready for interaction review when it builds and its tests pass in Xcode 26+ on macOS 26+. It is not ready for customer calls. Customer-call readiness requires real-device completion of M1–M4 acceptance scenarios, privacy verification, provider review, and signed distribution.
