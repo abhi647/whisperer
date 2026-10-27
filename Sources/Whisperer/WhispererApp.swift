@@ -89,10 +89,7 @@ private struct WindowReader: NSViewRepresentable {
         func resolve(_ window: NSWindow) {
             guard resolvedWindow !== window else { return }
             resolvedWindow = window
-            DispatchQueue.main.async { [weak self, weak window] in
-                guard let self, let window else { return }
-                self.onResolve(window)
-            }
+            onResolve(window)
         }
     }
 }
