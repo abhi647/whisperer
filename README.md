@@ -38,6 +38,14 @@ swift test
 
 The prototype requires no API keys and makes no network requests.
 
+### Development console notes
+
+When this Swift Package is run directly from Xcode, macOS may log App Intents
+`com.apple.linkd.autoShortcut` connection warnings and a missing main bundle
+identifier warning. These do not indicate an application failure. A stable bundle
+identifier, entitlements, signing, and App Intents registration belong to the
+proper Xcode application target created before microphone and screen-capture work.
+
 ## Next engineering milestone
 
 Add replaceable `AudioCapture`, `TranscriptionProvider`, and `CueProvider` protocols. Implement authorized ScreenCaptureKit system-audio capture and AVAudioEngine microphone capture as independent channels, then benchmark streaming transcription before selecting a provider. Do not add real customer capture until consent UX, provider retention terms, and privacy testing are complete.

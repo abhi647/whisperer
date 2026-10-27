@@ -62,18 +62,47 @@ private struct OverlayWindowRoot: View {
 private struct WindowReader: NSViewRepresentable {
     let onResolve: (NSWindow) -> Void
 
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onResolve: onResolve)
+    }
+
     func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        DispatchQueue.main.async {
-            if let window = view.window { onResolve(window) }
+        let view = WindowReadingView()
+        view.onWindowChange = { [weak coordinator = context.coordinator] window in
+            coordinator?.resolve(window)
         }
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        DispatchQueue.main.async {
-            if let window = nsView.window { onResolve(window) }
+        context.coordinator.onResolve = onResolve
+    }
+
+    final class Coordinator {
+        var onResolve: (NSWindow) -> Void
+        weak var resolvedWindow: NSWindow?
+
+        init(onResolve: @escaping (NSWindow) -> Void) {
+            self.onResolve = onResolve
         }
+
+        func resolve(_ window: NSWindow) {
+            guard resolvedWindow !== window else { return }
+            resolvedWindow = window
+            DispatchQueue.main.async { [weak self, weak window] in
+                guard let self, let window else { return }
+                self.onResolve(window)
+            }
+        }
+    }
+}
+
+private final class WindowReadingView: NSView {
+    var onWindowChange: ((NSWindow) -> Void)?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if let window { onWindowChange?(window) }
     }
 }
 
